@@ -1,163 +1,237 @@
--- Guh Hub Avançado com ESP Melhorado
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local CloseButton = Instance.new("TextButton")
-local MinimizeButton = Instance.new("TextButton")
-local ToggleButton = Instance.new("TextButton")
-local ESPButton = Instance.new("TextButton")
-local isMinimized = false
-local isESPActive = false
+-- Criando a interface principal
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Configurações da ScreenGui
-ScreenGui.Name = "GuhHub"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Criar a interface ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GUHHUBMenu"
+screenGui.Parent = playerGui
 
--- Configurações do MainFrame
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MainFrame.Size = UDim2.new(0, 300, 0, 200)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.Active = true
-MainFrame.Draggable = true
+-- Função para criar comportamento de arrastar
+local function makeDraggable(frame, dragHandle)
+    local dragging = false
+    local dragInput, mousePos, framePos
 
--- Configurações do título
-Title.Name = "Title"
-Title.Parent = MainFrame
-Title.Text = "Guh Hub"
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 24
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Title.Size = UDim2.new(1, 0, 0.2, 0)
-
--- Botão de fechar
-CloseButton.Name = "CloseButton"
-CloseButton.Parent = MainFrame
-CloseButton.Text = "X"
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.TextSize = 18
-CloseButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-CloseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-CloseButton.Size = UDim2.new(0.1, 0, 0.2, 0)
-CloseButton.Position = UDim2.new(0.9, 0, 0, 0)
-CloseButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-end)
-
--- Botão de minimizar
-MinimizeButton.Name = "MinimizeButton"
-MinimizeButton.Parent = MainFrame
-MinimizeButton.Text = "-"
-MinimizeButton.Font = Enum.Font.SourceSansBold
-MinimizeButton.TextSize = 18
-MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 0)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-MinimizeButton.Size = UDim2.new(0.1, 0, 0.2, 0)
-MinimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
-MinimizeButton.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
-        MainFrame.Size = UDim2.new(0, 300, 0, 40)
-    else
-        MainFrame.Size = UDim2.new(0, 300, 0, 200)
-    end
-end)
-
--- Botão ESP
-ESPButton.Name = "ESPButton"
-ESPButton.Parent = MainFrame
-ESPButton.Text = "Ativar ESP"
-ESPButton.Font = Enum.Font.SourceSans
-ESPButton.TextSize = 18
-ESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ESPButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-ESPButton.Size = UDim2.new(0.8, 0, 0.2, 0)
-ESPButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-
-ESPButton.MouseButton1Click:Connect(function()
-    isESPActive = not isESPActive
-    ESPButton.Text = isESPActive and "Desativar ESP" or "Ativar ESP"
-
-    -- Função ESP
-    local function createESP(player)
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Linha do jogador local ao alvo
-            local line = Instance.new("Part")
-            line.Name = "ESPLine"
-            line.Parent = player.Character
-            line.Anchored = true
-            line.CanCollide = false
-            line.Size = Vector3.new(0.1, 0.1, 0.1)
-            line.Material = Enum.Material.Neon
-            line.Color = Color3.new(math.random(), math.random(), math.random())
-
-            -- Caixa ao redor do personagem
-            local box = Instance.new("SelectionBox")
-            box.Name = "ESPBox"
-            box.Parent = player.Character
-            box.Adornee = player.Character
-            box.LineThickness = 0.05
-            box.Color3 = Color3.new(math.random(), math.random(), math.random())
-
-            -- Nome do jogador
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "ESPBillboard"
-            billboard.Parent = player.Character
-            billboard.Adornee = player.Character.HumanoidRootPart
-            billboard.Size = UDim2.new(0, 200, 0, 50)
-            billboard.AlwaysOnTop = true
-
-            local textLabel = Instance.new("TextLabel")
-            textLabel.Parent = billboard
-            textLabel.Size = UDim2.new(1, 0, 1, 0)
-            textLabel.Text = player.Name
-            textLabel.TextColor3 = Color3.new(math.random(), math.random(), math.random())
-            textLabel.BackgroundTransparency = 1
-
-            -- Atualizar a posição da linha
-            game:GetService("RunService").RenderStepped:Connect(function()
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    line.CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.Position, player.Character.HumanoidRootPart.Position) * CFrame.new(0, 0, -((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude / 2))
-                    line.Size = Vector3.new(0.1, 0.1, (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude)
+    dragHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            mousePos = input.Position
+            framePos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
                 end
             end)
         end
-    end
+    end)
 
-    if isESPActive then
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                createESP(player)
-            end
+    dragHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
         end
-    else
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player.Character then
-                for _, child in pairs(player.Character:GetChildren()) do
-                    if child.Name == "ESPLine" or child.Name == "ESPBox" or child.Name == "ESPBillboard" then
-                        child:Destroy()
-                    end
-                end
-            end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            frame.Position = UDim2.new(
+                framePos.X.Scale,
+                framePos.X.Offset + delta.X,
+                framePos.Y.Scale,
+                framePos.Y.Offset + delta.Y
+            )
         end
+    end)
+end
+
+-- Criar botão para alternar o menu
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleMenuButton"
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.Text = "GUHHUB"
+toggleButton.BackgroundColor3 = Color3.new(1, 1, 1) -- Branco inicial
+toggleButton.TextColor3 = Color3.new(0, 0, 0) -- Preto inicial
+toggleButton.Parent = screenGui
+
+-- Criar o menu
+local menuFrame = Instance.new("Frame")
+menuFrame.Name = "MenuFrame"
+menuFrame.Size = UDim2.new(0, 300, 0, 200)
+menuFrame.Position = UDim2.new(0, 10, 0, 70)
+menuFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2) -- Cinza escuro inicial
+menuFrame.Parent = screenGui
+
+-- Título do menu
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Text = "GUH HUB"
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Parent = menuFrame
+
+-- Botão de minimizar
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+minimizeButton.Position = UDim2.new(1, -60, 0, 0)
+minimizeButton.Text = "-"
+minimizeButton.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
+minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+minimizeButton.Parent = menuFrame
+
+-- Botão de fechar
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -30, 0, 0)
+closeButton.Text = "X"
+closeButton.BackgroundColor3 = Color3.new(1, 0, 0)
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.Parent = menuFrame
+
+-- Botão de configurações
+local settingsButton = Instance.new("TextButton")
+settingsButton.Size = UDim2.new(0, 100, 0, 30)
+settingsButton.Position = UDim2.new(0, 10, 0, 40)
+settingsButton.Text = "Configurações"
+settingsButton.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+settingsButton.TextColor3 = Color3.new(1, 1, 1)
+settingsButton.Parent = menuFrame
+
+-- Minimizar menu
+local minimized = false
+local function toggleMinimize()
+    minimized = not minimized
+    for _, child in ipairs(menuFrame:GetChildren()) do
+        if child ~= titleLabel and child ~= minimizeButton and child ~= closeButton then
+            child.Visible = not minimized
+        end
+    end
+    menuFrame.Size = minimized and UDim2.new(0, 300, 0, 30) or UDim2.new(0, 300, 0, 200)
+end
+minimizeButton.MouseButton1Click:Connect(toggleMinimize)
+
+-- Fechar menu
+local function confirmClose()
+    menuFrame.Visible = false
+    toggleButton.Visible = false
+end
+
+local function showConfirmation()
+    local confirmationFrame = Instance.new("Frame")
+    confirmationFrame.Size = UDim2.new(0, 200, 0, 100)
+    confirmationFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+    confirmationFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    confirmationFrame.Parent = screenGui
+
+    local confirmationLabel = Instance.new("TextLabel")
+    confirmationLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    confirmationLabel.Text = "Deseja fechar?"
+    confirmationLabel.TextColor3 = Color3.new(1, 1, 1)
+    confirmationLabel.BackgroundTransparency = 1
+    confirmationLabel.Parent = confirmationFrame
+
+    local yesButton = Instance.new("TextButton")
+    yesButton.Size = UDim2.new(0.5, -5, 0.5, 0)
+    yesButton.Position = UDim2.new(0, 0, 0.5, 0)
+    yesButton.Text = "Sim"
+    yesButton.BackgroundColor3 = Color3.new(1, 0, 0)
+    yesButton.TextColor3 = Color3.new(1, 1, 1)
+    yesButton.Parent = confirmationFrame
+
+    local noButton = Instance.new("TextButton")
+    noButton.Size = UDim2.new(0.5, -5, 0.5, 0)
+    noButton.Position = UDim2.new(0.5, 5, 0.5, 0)
+    noButton.Text = "Não"
+    noButton.BackgroundColor3 = Color3.new(0, 1, 0)
+    noButton.TextColor3 = Color3.new(1, 1, 1)
+    noButton.Parent = confirmationFrame
+
+    yesButton.MouseButton1Click:Connect(function()
+        confirmClose()
+        confirmationFrame:Destroy()
+    end)
+
+    noButton.MouseButton1Click:Connect(function()
+        confirmationFrame:Destroy()
+    end)
+end
+
+closeButton.MouseButton1Click:Connect(showConfirmation)
+
+-- Alternar visibilidade do menu
+local menuVisible = true
+local function toggleMenu()
+    menuVisible = not menuVisible
+    menuFrame.Visible = menuVisible
+end
+toggleButton.MouseButton1Click:Connect(toggleMenu)
+
+-- Tornar o menu arrastável
+makeDraggable(menuFrame, titleLabel)
+
+-- Criar interface de configurações
+local settingsFrame = Instance.new("Frame")
+settingsFrame.Size = UDim2.new(0, 300, 0, 150)
+settingsFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+settingsFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+settingsFrame.Visible = false
+settingsFrame.Parent = screenGui
+
+-- Título do menu de configurações
+local settingsTitle = Instance.new("TextLabel")
+settingsTitle.Size = UDim2.new(1, 0, 0, 30)
+settingsTitle.Text = "Configurações"
+settingsTitle.TextColor3 = Color3.new(1, 1, 1)
+settingsTitle.BackgroundTransparency = 1
+settingsTitle.Parent = settingsFrame
+
+-- Botão para fechar configurações
+local settingsCloseButton = Instance.new("TextButton")
+settingsCloseButton.Size = UDim2.new(0, 30, 0, 30)
+settingsCloseButton.Position = UDim2.new(1, -30, 0, 0)
+settingsCloseButton.Text = "X"
+settingsCloseButton.BackgroundColor3 = Color3.new(1, 0, 0)
+settingsCloseButton.TextColor3 = Color3.new(1, 1, 1)
+settingsCloseButton.Parent = settingsFrame
+
+settingsCloseButton.MouseButton1Click:Connect(function()
+    settingsFrame.Visible = false
+end)
+
+-- Tornar o menu de configurações arrastável
+makeDraggable(settingsFrame, settingsTitle)
+
+-- Adicionar seletor de cores
+local colorPickerLabel = Instance.new("TextLabel")
+colorPickerLabel.Size = UDim2.new(1, 0, 0, 30)
+colorPickerLabel.Position = UDim2.new(0, 0, 0, 40)
+colorPickerLabel.Text = "Escolha a cor do menu"
+colorPickerLabel.TextColor3 = Color3.new(1, 1, 1)
+colorPickerLabel.BackgroundTransparency = 1
+colorPickerLabel.Parent = settingsFrame
+
+local colorPickerFrame = Instance.new("Frame")
+colorPickerFrame.Size = UDim2.new(0, 200, 0, 30)
+colorPickerFrame.Position = UDim2.new(0.5, -100, 0.5, -15)
+colorPickerFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+colorPickerFrame.BorderSizePixel = 1
+colorPickerFrame.Parent = settingsFrame
+
+local draggableBall = Instance.new("Frame")
+draggableBall.Size = UDim2.new(0, 30, 0, 30)
+draggableBall.Position = UDim2.new(0, 0, 0, 0)
+draggableBall.BackgroundColor3 = Color3.new(0, 0, 0)
+draggableBall.Parent = colorPickerFrame
+makeDraggable(draggableBall, draggableBall)
+
+colorPickerFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggableBall.Position = UDim2.new(0, input.Position.X - colorPickerFrame.AbsolutePosition.X, 0, 0)
+        local newColor = Color3.new((draggableBall.Position.X.Offset / colorPickerFrame.Size.X.Offset), 0.5, 0.5)
+        menuFrame.BackgroundColor3 = newColor
     end
 end)
 
--- Botão GUH
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ScreenGui
-ToggleButton.Text = "GUH"
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.TextSize = 18
-ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 255)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-ToggleButton.Position = UDim2.new(0, 10, 0, 10)
-ToggleButton.Active = true
-ToggleButton.Draggable = true
-ToggleButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
+settingsButton.MouseButton1Click:Connect(function()
+    settingsFrame.Visible = not settingsFrame.Visible
 end)
